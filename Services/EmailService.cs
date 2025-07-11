@@ -142,7 +142,7 @@ public class EmailService : IEmailService
 
                         table.Footer(footer =>
                         {
-                            footer.Cell().Element(DataCell).ColumnSpan(3).AlignRight().Text("Toplam");
+                            footer.Cell().ColumnSpan(3).Element(DataCell).AlignRight().Text("Toplam");
                             footer.Cell().Element(DataCell).AlignRight().Text(offer.TotalAmount.ToString("C"));
                         });
 

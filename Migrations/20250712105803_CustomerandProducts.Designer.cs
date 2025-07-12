@@ -12,15 +12,15 @@ using OfferManagement.API.Data;
 namespace OfferManagement.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250711095259_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250712105803_CustomerandProducts")]
+    partial class CustomerandProducts
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.0")
+                .HasAnnotation("ProductVersion", "9.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -306,6 +306,42 @@ namespace OfferManagement.API.Migrations
                     b.ToTable("Companies");
                 });
 
+            modelBuilder.Entity("OfferManagement.API.Models.Customer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
+
+                    b.ToTable("Customers");
+                });
+
             modelBuilder.Entity("OfferManagement.API.Models.Offer", b =>
                 {
                     b.Property<int>("Id")
@@ -408,6 +444,40 @@ namespace OfferManagement.API.Migrations
                     b.ToTable("OfferItems");
                 });
 
+            modelBuilder.Entity("OfferManagement.API.Models.Product", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Category")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
+
+                    b.ToTable("Products");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -469,6 +539,17 @@ namespace OfferManagement.API.Migrations
                     b.Navigation("Company");
                 });
 
+            modelBuilder.Entity("OfferManagement.API.Models.Customer", b =>
+                {
+                    b.HasOne("OfferManagement.API.Models.Company", "Company")
+                        .WithMany("Customers")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+                });
+
             modelBuilder.Entity("OfferManagement.API.Models.Offer", b =>
                 {
                     b.HasOne("OfferManagement.API.Models.Company", "Company")
@@ -499,6 +580,17 @@ namespace OfferManagement.API.Migrations
                     b.Navigation("Offer");
                 });
 
+            modelBuilder.Entity("OfferManagement.API.Models.Product", b =>
+                {
+                    b.HasOne("OfferManagement.API.Models.Company", "Company")
+                        .WithMany("Products")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+                });
+
             modelBuilder.Entity("OfferManagement.API.Models.ApplicationUser", b =>
                 {
                     b.Navigation("Offers");
@@ -506,7 +598,11 @@ namespace OfferManagement.API.Migrations
 
             modelBuilder.Entity("OfferManagement.API.Models.Company", b =>
                 {
+                    b.Navigation("Customers");
+
                     b.Navigation("Offers");
+
+                    b.Navigation("Products");
 
                     b.Navigation("Users");
                 });

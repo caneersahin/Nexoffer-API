@@ -98,38 +98,61 @@ public class EmailService : IEmailService
             container.Page(page =>
             {
                 page.Size(PageSizes.A4);
-                page.Margin(20);
-                page.DefaultTextStyle(TextStyle.Default.FontSize(12));
+                page.Margin(30);
+                page.DefaultTextStyle(TextStyle.Default.FontSize(10));
 
-                page.Content().Column(column =>
+                page.Header().Row(row =>
                 {
-                    column.Item().Text(offer.Company.Name).FontSize(18).Bold();
-                    column.Item().Text(offer.Company.Address);
-                    column.Item().Text($"Telefon: {offer.Company.Phone}  E-posta: {offer.Company.Email}");
-                    column.Item().PaddingVertical(10).LineHorizontal(1);
+                    row.ConstantColumn(120).Height(80).Image("wwwroot/"+offer.Company.Logo, ImageScaling.FitArea); // Logo
 
-                    column.Item().Text($"Teklif No: {offer.OfferNumber}").Bold();
-                    column.Item().Text($"Tarih: {offer.OfferDate:dd.MM.yyyy}");
-                    column.Item().Text($"Müşteri: {offer.CustomerName}");
-                    column.Item().Text($"Adres: {offer.CustomerAddress}");
-                    column.Item().PaddingVertical(10).LineHorizontal(1);
+                    row.RelativeColumn().AlignRight().Column(col =>
+                    {
+                        col.Item().Text(offer.Company.Name).FontSize(16).Bold();
+                        col.Item().Text(offer.Company.Address);
+                        col.Item().Text($"Tel: {offer.Company.Phone}");
+                        col.Item().Text($"E-posta: {offer.Company.Email}");
+                    });
+                });
+
+                page.Content().PaddingVertical(15).Column(column =>
+                {
+                    column.Spacing(15);
+
+                    column.Item().Row(row =>
+                    {
+                        row.RelativeColumn().Column(col =>
+                        {
+                            col.Item().Text("TEKLİF BİLGİLERİ").Bold().FontSize(12).Underline();
+                            col.Item().Text($"Teklif No: {offer.OfferNumber}");
+                            col.Item().Text($"Tarih: {offer.OfferDate:dd.MM.yyyy}");
+                        });
+
+                        row.RelativeColumn().Column(col =>
+                        {
+                            col.Item().Text("MÜŞTERİ BİLGİLERİ").Bold().FontSize(12).Underline();
+                            col.Item().Text(offer.CustomerName);
+                            col.Item().Text(offer.CustomerAddress);
+                        });
+                    });
+
+                    column.Item().PaddingVertical(10).LineHorizontal(1).LineColor(Colors.Grey.Medium);
 
                     column.Item().Table(table =>
                     {
                         table.ColumnsDefinition(columns =>
                         {
-                            columns.RelativeColumn();
-                            columns.ConstantColumn(50);
-                            columns.ConstantColumn(80);
-                            columns.ConstantColumn(80);
+                            columns.RelativeColumn(4);
+                            columns.RelativeColumn(1);
+                            columns.RelativeColumn(2);
+                            columns.RelativeColumn(2);
                         });
 
                         table.Header(header =>
                         {
-                            header.Cell().Element(HeaderCell).Text("Açıklama");
+                            header.Cell().Element(HeaderCell).Text("Ürün Açıklaması");
                             header.Cell().Element(HeaderCell).AlignCenter().Text("Adet");
                             header.Cell().Element(HeaderCell).AlignRight().Text("Birim Fiyat");
-                            header.Cell().Element(HeaderCell).AlignRight().Text("Toplam");
+                            header.Cell().Element(HeaderCell).AlignRight().Text("Tutar");
                         });
 
                         foreach (var item in offer.Items)
@@ -140,22 +163,51 @@ public class EmailService : IEmailService
                             table.Cell().Element(DataCell).AlignRight().Text(item.TotalPrice.ToString("C"));
                         }
 
+                        // Ara toplam, KDV, genel toplam
                         table.Footer(footer =>
                         {
-                            footer.Cell().ColumnSpan(3).Element(DataCell).AlignRight().Text("Toplam");
-                            footer.Cell().Element(DataCell).AlignRight().Text(offer.TotalAmount.ToString("C"));
+                            footer.Cell().ColumnSpan(3).Element(DataCell).AlignRight().Text("Ara Toplam").Bold();
+                            footer.Cell().Element(DataCell).AlignRight().Text((offer.TotalAmount * 0.82m).ToString("C")).Bold();
+
+                            footer.Cell().ColumnSpan(3).Element(DataCell).AlignRight().Text("KDV %18").Bold();
+                            footer.Cell().Element(DataCell).AlignRight().Text((offer.TotalAmount * 0.18m).ToString("C")).Bold();
+
+                            footer.Cell().ColumnSpan(3).Element(DataCell).AlignRight().Text("Genel Toplam").Bold().FontSize(11);
+                            footer.Cell().Element(DataCell).AlignRight().Text(offer.TotalAmount.ToString("C")).Bold().FontSize(11);
                         });
 
                         static IContainer HeaderCell(IContainer container) =>
-                            container.DefaultTextStyle(TextStyle.Default.SemiBold()).Padding(5).Background(Colors.Grey.Lighten2);
+                            container.PaddingVertical(5).PaddingLeft(5).Background("#eeeeee").BorderBottom(1).BorderColor(Colors.Grey.Medium).DefaultTextStyle(TextStyle.Default.SemiBold());
 
                         static IContainer DataCell(IContainer container) =>
-                            container.Padding(5).BorderBottom(1).BorderColor(Colors.Grey.Lighten2);
+                            container.PaddingVertical(4).PaddingLeft(5).BorderBottom(1).BorderColor(Colors.Grey.Lighten2);
                     });
+
+                    column.Item().PaddingTop(20).Row(row =>
+                    {
+                        row.RelativeColumn().Text("Not: Bu teklif belge niteliğindedir. Siparişe dönüşmeden fatura oluşturulmaz.")
+                            .Italic().FontSize(9);
+
+                        row.ConstantColumn(200).Column(col =>
+                        {
+                            col.Item().Text("Yetkili İmza").AlignRight().FontSize(10).Bold();
+                            col.Item().Height(40);
+                            col.Item().Container().AlignRight().Width(150).LineHorizontal(1);
+                        });
+                    });
+                });
+
+                page.Footer().AlignRight().Text(text =>
+                {
+                    text.Span("Sayfa ").FontSize(9);
+                    text.CurrentPageNumber();
+                    text.Span(" / ");
+                    text.TotalPages();
                 });
             });
         });
 
         return document.GeneratePdf();
     }
+
 }

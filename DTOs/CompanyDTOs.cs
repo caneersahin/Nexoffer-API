@@ -14,6 +14,7 @@ public class CompanyDto
     public string SubscriptionPlan { get; set; } = string.Empty;
     public DateTime SubscriptionStartDate { get; set; }
     public DateTime? SubscriptionEndDate { get; set; }
+    public int OffersUsed { get; set; }
     public bool IsActive { get; set; }
 }
 

@@ -75,4 +75,22 @@ public class CompanyController : ControllerBase
 
         return Ok(new { Success = true, Message = "Logo uploaded successfully" });
     }
+
+    [HttpPost("upgrade")]
+    public async Task<IActionResult> UpgradePlan([FromBody] UpgradePlanRequest request)
+    {
+        var companyIdClaim = User.FindFirst("CompanyId")?.Value;
+        if (companyIdClaim == null || !int.TryParse(companyIdClaim, out var companyId))
+        {
+            return BadRequest("Invalid company");
+        }
+
+        var company = await _companyService.UpgradePlanAsync(companyId, request.Plan);
+        if (company == null)
+        {
+            return NotFound("Company not found");
+        }
+
+        return Ok(company);
+    }
 }

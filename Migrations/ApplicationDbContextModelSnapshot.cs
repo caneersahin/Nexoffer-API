@@ -287,6 +287,9 @@ namespace OfferManagement.API.Migrations
                     b.Property<int>("SubscriptionPlan")
                         .HasColumnType("int");
 
+                    b.Property<int>("OffersUsed")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("SubscriptionStartDate")
                         .HasColumnType("datetime2");
 

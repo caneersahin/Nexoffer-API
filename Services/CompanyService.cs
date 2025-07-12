@@ -96,7 +96,22 @@ public class CompanyService : ICompanyService
             SubscriptionPlan = company.SubscriptionPlan.ToString(),
             SubscriptionStartDate = company.SubscriptionStartDate,
             SubscriptionEndDate = company.SubscriptionEndDate,
+            OffersUsed = company.OffersUsed,
             IsActive = company.IsActive
         };
+    }
+
+    public async Task<CompanyDto?> UpgradePlanAsync(int id, SubscriptionPlan plan)
+    {
+        var company = await _context.Companies.FindAsync(id);
+        if (company == null) return null;
+
+        company.SubscriptionPlan = plan;
+        company.SubscriptionStartDate = DateTime.UtcNow;
+        company.SubscriptionEndDate = null;
+
+        await _context.SaveChangesAsync();
+
+        return MapToDto(company);
     }
 }

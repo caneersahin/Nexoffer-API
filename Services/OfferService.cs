@@ -18,10 +18,24 @@ public class OfferService : IOfferService
         _emailService = emailService;
     }
 
-    public async Task<OfferDto?> CreateOfferAsync(CreateOfferRequest request, string userId)
+    public async Task<OfferOperationResponse> CreateOfferAsync(CreateOfferRequest request, string userId)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
-        if (user?.CompanyId == null) return null;
+        if (user?.CompanyId == null)
+        {
+            return new OfferOperationResponse { Success = false, Message = "Invalid user" };
+        }
+
+        var company = await _context.Companies.FirstOrDefaultAsync(c => c.Id == user.CompanyId.Value);
+        if (company == null)
+        {
+            return new OfferOperationResponse { Success = false, Message = "Company not found" };
+        }
+
+        if (company.SubscriptionPlan == SubscriptionPlan.Free && company.OffersUsed >= 5)
+        {
+            return new OfferOperationResponse { Success = false, Message = "Free plan limit reached. Please upgrade your plan." };
+        }
 
         var lastOffer = await _context.Offers
             .Where(o => o.CompanyId == user.CompanyId)
@@ -55,9 +69,19 @@ public class OfferService : IOfferService
         offer.TotalAmount = offer.Items.Sum(i => i.TotalPrice);
 
         _context.Offers.Add(offer);
+
+        company.OffersUsed += 1;
+
         await _context.SaveChangesAsync();
 
-        return await GetOfferByIdAsync(offer.Id, user.CompanyId.Value);
+        var dto = await GetOfferByIdAsync(offer.Id, user.CompanyId.Value);
+
+        return new OfferOperationResponse
+        {
+            Success = true,
+            Offer = dto,
+            Message = "Offer created"
+        };
     }
 
     public async Task<OfferDto?> GetOfferByIdAsync(int id, int companyId)

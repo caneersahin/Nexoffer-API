@@ -32,6 +32,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(e => e.IBAN).HasMaxLength(50);
             entity.Property(e => e.Website).HasMaxLength(200);
             entity.Property(e => e.Logo).HasMaxLength(500);
+            entity.Property(e => e.OffersUsed);
         });
 
         // User-Company relationship

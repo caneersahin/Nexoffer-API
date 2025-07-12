@@ -1,4 +1,5 @@
 using OfferManagement.API.DTOs;
+using OfferManagement.API.Models;
 
 namespace OfferManagement.API.Services;
 
@@ -8,4 +9,5 @@ public interface ICompanyService
     Task<CompanyDto?> GetCompanyByUserIdAsync(string userId);
     Task<CompanyDto?> UpdateCompanyAsync(int id, UpdateCompanyRequest request);
     Task<bool> UploadLogoAsync(int id, IFormFile logo);
+    Task<CompanyDto?> UpgradePlanAsync(int id, SubscriptionPlan plan);
 }

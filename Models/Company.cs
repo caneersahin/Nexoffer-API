@@ -27,6 +27,11 @@ public class Company
     public string? Website { get; set; }
     
     public SubscriptionPlan SubscriptionPlan { get; set; } = SubscriptionPlan.Free;
+
+    /// <summary>
+    /// Tracks how many offers have been created while on the free plan.
+    /// </summary>
+    public int OffersUsed { get; set; } = 0;
     
     public DateTime SubscriptionStartDate { get; set; } = DateTime.UtcNow;
     

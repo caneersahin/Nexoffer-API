@@ -37,8 +37,12 @@ public class Company
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     
     public ICollection<ApplicationUser> Users { get; set; } = new List<ApplicationUser>();
-    
+
     public ICollection<Offer> Offers { get; set; } = new List<Offer>();
+
+    public ICollection<Product> Products { get; set; } = new List<Product>();
+
+    public ICollection<Customer> Customers { get; set; } = new List<Customer>();
 }
 
 public enum SubscriptionPlan

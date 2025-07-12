@@ -13,6 +13,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Company> Companies { get; set; }
     public DbSet<Offer> Offers { get; set; }
     public DbSet<OfferItem> OfferItems { get; set; }
+    public DbSet<Product> Products { get; set; }
+    public DbSet<Customer> Customers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -75,6 +77,36 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             entity.HasOne(oi => oi.Offer)
                   .WithMany(o => o.Items)
                   .HasForeignKey(oi => oi.OfferId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Product configuration
+        builder.Entity<Product>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Description).HasMaxLength(1000);
+            entity.Property(e => e.Category).HasMaxLength(100);
+            entity.Property(e => e.Price).HasColumnType("decimal(18,2)");
+
+            entity.HasOne(p => p.Company)
+                  .WithMany(c => c.Products)
+                  .HasForeignKey(p => p.CompanyId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Customer configuration
+        builder.Entity<Customer>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Email).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Phone).HasMaxLength(20);
+            entity.Property(e => e.Address).HasMaxLength(500);
+
+            entity.HasOne(cu => cu.Company)
+                  .WithMany(c => c.Customers)
+                  .HasForeignKey(cu => cu.CompanyId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
     }

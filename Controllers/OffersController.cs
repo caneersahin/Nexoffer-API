@@ -20,26 +20,30 @@ public class OffersController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetOffers([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
-        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        if (userId == null)
+        //var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var companyIdStr = User.FindFirst("CompanyId")?.Value;
+
+        if (!int.TryParse(companyIdStr, out int companyId))
         {
-            return BadRequest("Invalid user");
+            return BadRequest("Invalid company ID");
         }
 
-        var offers = await _offerService.GetOffersByUserAsync(userId, page, pageSize);
+        var offers = await _offerService.GetOffersByCompanyAsync(companyId, page, pageSize);
         return Ok(offers);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetOffer(int id)
     {
-        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        if (userId == null)
+        //var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var companyIdStr = User.FindFirst("CompanyId")?.Value;
+
+        if (!int.TryParse(companyIdStr, out int companyId))
         {
-            return BadRequest("Invalid user");
+            return BadRequest("Invalid company ID");
         }
 
-        var offer = await _offerService.GetOfferByIdAsync(id, userId);
+        var offer = await _offerService.GetOfferByIdAsync(id, companyId);
         if (offer == null)
         {
             return NotFound("Offer not found");
@@ -75,7 +79,7 @@ public class OffersController : ControllerBase
             return BadRequest("Invalid user");
         }
 
-        var offer = await _offerService.UpdateOfferAsync(id, request, userId);
+        var offer = await _offerService.UpdateOfferAsync(id, request);
         if (offer == null)
         {
             return NotFound("Offer not found");

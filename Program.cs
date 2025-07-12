@@ -6,6 +6,7 @@ using Microsoft.OpenApi.Models;
 using OfferManagement.API.Data;
 using OfferManagement.API.Models;
 using OfferManagement.API.Services;
+using QuestPDF.Infrastructure;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -95,6 +96,9 @@ builder.Services.AddCors(options =>
                .AllowAnyHeader();
     });
 });
+
+QuestPDF.Settings.License = LicenseType.Community;
+
 
 var app = builder.Build();
 

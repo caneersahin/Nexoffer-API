@@ -1,7 +1,9 @@
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using OfferManagement.API.Data;
 using OfferManagement.API.DTOs;
 using OfferManagement.API.Models;
+using System.ComponentModel.Design;
 
 namespace OfferManagement.API.Services;
 
@@ -55,15 +57,15 @@ public class OfferService : IOfferService
         _context.Offers.Add(offer);
         await _context.SaveChangesAsync();
 
-        return await GetOfferByIdAsync(offer.Id, userId);
+        return await GetOfferByIdAsync(offer.Id, user.CompanyId.Value);
     }
 
-    public async Task<OfferDto?> GetOfferByIdAsync(int id, string userId)
+    public async Task<OfferDto?> GetOfferByIdAsync(int id, int companyId)
     {
         var offer = await _context.Offers
             .Include(o => o.Items)
             .Include(o => o.Company)
-            .FirstOrDefaultAsync(o => o.Id == id && o.UserId == userId);
+            .FirstOrDefaultAsync(o => o.Id == id && o.CompanyId == companyId);
 
         if (offer == null) return null;
 
@@ -84,13 +86,28 @@ public class OfferService : IOfferService
         return offers.Select(MapToDto).ToList();
     }
 
-    public async Task<OfferDto?> UpdateOfferAsync(int id, UpdateOfferRequest request, string userId)
+    public async Task<List<OfferDto>> GetOffersByCompanyAsync(int companyId, int page = 1, int pageSize = 10)
+    {
+        var offers = await _context.Offers
+            .Include(o => o.Items)
+            .Include(o => o.Company)
+            .Where(o => o.CompanyId == companyId)
+            .OrderByDescending(o => o.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return offers.Select(MapToDto).ToList();
+    }
+
+    public async Task<OfferDto?> UpdateOfferAsync(int id, UpdateOfferRequest request)
     {
         var offer = await _context.Offers
             .Include(o => o.Items)
-            .FirstOrDefaultAsync(o => o.Id == id && o.UserId == userId);
+            .FirstOrDefaultAsync(o => o.Id == id);
 
         if (offer == null) return null;
+
 
         offer.CustomerName = request.CustomerName;
         offer.CustomerEmail = request.CustomerEmail;
@@ -115,7 +132,7 @@ public class OfferService : IOfferService
         offer.TotalAmount = offer.Items.Sum(i => i.TotalPrice);
 
         await _context.SaveChangesAsync();
-        return await GetOfferByIdAsync(offer.Id, userId);
+        return await GetOfferByIdAsync(offer.Id, offer.CompanyId);
     }
 
     public async Task<bool> DeleteOfferAsync(int id, string userId)

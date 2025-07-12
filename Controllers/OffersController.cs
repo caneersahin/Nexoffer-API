@@ -61,13 +61,13 @@ public class OffersController : ControllerBase
             return BadRequest("Invalid user");
         }
 
-        var offer = await _offerService.CreateOfferAsync(request, userId);
-        if (offer == null)
+        var result = await _offerService.CreateOfferAsync(request, userId);
+        if (!result.Success || result.Offer == null)
         {
-            return BadRequest("Failed to create offer");
+            return BadRequest(result.Message);
         }
 
-        return CreatedAtAction(nameof(GetOffer), new { id = offer.Id }, offer);
+        return CreatedAtAction(nameof(GetOffer), new { id = result.Offer.Id }, result.Offer);
     }
 
     [HttpPut("{id}")]

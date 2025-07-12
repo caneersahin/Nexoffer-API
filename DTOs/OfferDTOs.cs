@@ -62,3 +62,10 @@ public class UpdateOfferRequest
     public string? Notes { get; set; }
     public List<CreateOfferItemRequest> Items { get; set; } = new();
 }
+
+public class OfferOperationResponse
+{
+    public bool Success { get; set; }
+    public string Message { get; set; } = string.Empty;
+    public OfferDto? Offer { get; set; }
+}

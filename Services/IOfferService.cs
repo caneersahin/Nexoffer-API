@@ -4,7 +4,7 @@ namespace OfferManagement.API.Services;
 
 public interface IOfferService
 {
-    Task<OfferDto?> CreateOfferAsync(CreateOfferRequest request, string userId);
+    Task<OfferOperationResponse> CreateOfferAsync(CreateOfferRequest request, string userId);
     Task<OfferDto?> GetOfferByIdAsync(int id, int companyId);
     Task<List<OfferDto>> GetOffersByUserAsync(string userId, int page = 1, int pageSize = 10);
     Task<List<OfferDto>> GetOffersByCompanyAsync(int companyId, int page = 1, int pageSize = 10);

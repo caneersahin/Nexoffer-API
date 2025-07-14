@@ -55,6 +55,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -136,10 +137,34 @@ using (var scope = app.Services.CreateScope())
     {
         await roleManager.CreateAsync(new IdentityRole("Admin"));
     }
+
+    if (!await roleManager.RoleExistsAsync("SuperAdmin"))
+    {
+        await roleManager.CreateAsync(new IdentityRole("SuperAdmin"));
+    }
     
     if (!await roleManager.RoleExistsAsync("User"))
     {
         await roleManager.CreateAsync(new IdentityRole("User"));
+    }
+
+    var superAdminEmail = builder.Configuration["SuperAdmin:Email"];
+    var superAdminPassword = builder.Configuration["SuperAdmin:Password"];
+    if (!string.IsNullOrEmpty(superAdminEmail) && !string.IsNullOrEmpty(superAdminPassword))
+    {
+        var adminUser = await userManager.FindByEmailAsync(superAdminEmail);
+        if (adminUser == null)
+        {
+            adminUser = new ApplicationUser
+            {
+                UserName = superAdminEmail,
+                Email = superAdminEmail,
+                FirstName = "Super",
+                LastName = "Admin"
+            };
+            await userManager.CreateAsync(adminUser, superAdminPassword);
+            await userManager.AddToRoleAsync(adminUser, "SuperAdmin");
+        }
     }
 }
 

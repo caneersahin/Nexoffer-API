@@ -101,14 +101,23 @@ public class CompanyService : ICompanyService
         };
     }
 
-    public async Task<CompanyDto?> UpgradePlanAsync(int id, SubscriptionPlan plan)
+    public async Task<CompanyDto?> UpgradePlanAsync(int id, UpgradePlanRequest request)
     {
         var company = await _context.Companies.FindAsync(id);
         if (company == null) return null;
 
-        company.SubscriptionPlan = plan;
-        company.SubscriptionStartDate = DateTime.UtcNow;
-        company.SubscriptionEndDate = company.SubscriptionStartDate.AddMonths(1);
+        var payment = new Payment
+        {
+            Amount = request.Amount,
+            TransactionId = request.TransactionId,
+            CompanyId = id
+        };
+
+        _context.Payments.Add(payment);
+
+        company.SubscriptionPlan = request.Plan;
+        company.SubscriptionStartDate = payment.PaidAt;
+        company.SubscriptionEndDate = payment.PaidAt.AddMonths(1);
         company.IsActive = true;
 
         await _context.SaveChangesAsync();
@@ -143,5 +152,21 @@ public class CompanyService : ICompanyService
             PaidAt = payment.PaidAt,
             TransactionId = payment.TransactionId
         };
+    }
+
+    public async Task<List<PaymentDto>> GetPaymentHistoryAsync(int id)
+    {
+        var payments = await _context.Payments
+            .Where(p => p.CompanyId == id)
+            .OrderByDescending(p => p.PaidAt)
+            .ToListAsync();
+
+        return payments.Select(p => new PaymentDto
+        {
+            Id = p.Id,
+            Amount = p.Amount,
+            PaidAt = p.PaidAt,
+            TransactionId = p.TransactionId
+        }).ToList();
     }
 }

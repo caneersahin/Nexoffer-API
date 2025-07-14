@@ -85,7 +85,7 @@ public class CompanyController : ControllerBase
             return BadRequest("Invalid company");
         }
 
-        var company = await _companyService.UpgradePlanAsync(companyId, request.Plan);
+        var company = await _companyService.UpgradePlanAsync(companyId, request);
         if (company == null)
         {
             return NotFound("Company not found");
@@ -110,5 +110,18 @@ public class CompanyController : ControllerBase
         }
 
         return Ok(payment);
+    }
+
+    [HttpGet("payments")]
+    public async Task<IActionResult> GetPaymentHistory()
+    {
+        var companyIdClaim = User.FindFirst("CompanyId")?.Value;
+        if (companyIdClaim == null || !int.TryParse(companyIdClaim, out var companyId))
+        {
+            return BadRequest("Invalid company");
+        }
+
+        var payments = await _companyService.GetPaymentHistoryAsync(companyId);
+        return Ok(payments);
     }
 }

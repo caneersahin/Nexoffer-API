@@ -98,25 +98,28 @@ public class EmailService : IEmailService
             container.Page(page =>
             {
                 page.Size(PageSizes.A4);
-                page.Margin(30);
-                page.DefaultTextStyle(TextStyle.Default.FontSize(10));
+                page.Margin(20);
+                page.DefaultTextStyle(TextStyle.Default.FontSize(11).FontFamily("Helvetica"));
+                page.Background(Colors.White);
 
-                page.Header().Row(row =>
+                page.Header().Background(Colors.Grey.Lighten3).Padding(10).Row(row =>
                 {
                     row.ConstantColumn(120).Height(80).Image("wwwroot/"+offer.Company.Logo, ImageScaling.FitArea); // Logo
 
                     row.RelativeColumn().AlignRight().Column(col =>
                     {
-                        col.Item().Text(offer.Company.Name).FontSize(16).Bold();
+                        col.Item().Text(offer.Company.Name).FontSize(18).Bold();
                         col.Item().Text(offer.Company.Address);
                         col.Item().Text($"Tel: {offer.Company.Phone}");
                         col.Item().Text($"E-posta: {offer.Company.Email}");
                     });
                 });
 
-                page.Content().PaddingVertical(15).Column(column =>
+                page.Content().PaddingVertical(10).Column(column =>
                 {
                     column.Spacing(15);
+
+                    column.Item().AlignCenter().Text($"Teklif: {offer.OfferNumber}").Bold().FontSize(20);
 
                     column.Item().Row(row =>
                     {
@@ -177,10 +180,10 @@ public class EmailService : IEmailService
                         });
 
                         static IContainer HeaderCell(IContainer container) =>
-                            container.PaddingVertical(5).PaddingLeft(5).Background("#eeeeee").BorderBottom(1).BorderColor(Colors.Grey.Medium).DefaultTextStyle(TextStyle.Default.SemiBold());
+                            container.PaddingVertical(5).PaddingLeft(5).Background("#eeeeee").BorderBottom(1).BorderColor(Colors.Grey.Medium).DefaultTextStyle(TextStyle.Default.SemiBold().FontSize(11));
 
                         static IContainer DataCell(IContainer container) =>
-                            container.PaddingVertical(4).PaddingLeft(5).BorderBottom(1).BorderColor(Colors.Grey.Lighten2);
+                            container.PaddingVertical(4).PaddingLeft(5).BorderBottom(1).BorderColor(Colors.Grey.Lighten2).DefaultTextStyle(TextStyle.Default.FontSize(10));
                     });
 
                     column.Item().PaddingTop(20).Row(row =>
@@ -197,6 +200,7 @@ public class EmailService : IEmailService
                     });
                 });
 
+                page.Footer().PaddingTop(10).LineHorizontal(1).LineColor(Colors.Grey.Lighten2);
                 page.Footer().AlignRight().Text(text =>
                 {
                     text.Span("Sayfa ").FontSize(9);

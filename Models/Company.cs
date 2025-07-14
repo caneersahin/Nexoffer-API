@@ -48,6 +48,8 @@ public class Company
     public ICollection<Product> Products { get; set; } = new List<Product>();
 
     public ICollection<Customer> Customers { get; set; } = new List<Customer>();
+
+    public ICollection<Payment> Payments { get; set; } = new List<Payment>();
 }
 
 public enum SubscriptionPlan

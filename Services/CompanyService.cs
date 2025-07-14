@@ -108,10 +108,40 @@ public class CompanyService : ICompanyService
 
         company.SubscriptionPlan = plan;
         company.SubscriptionStartDate = DateTime.UtcNow;
-        company.SubscriptionEndDate = null;
+        company.SubscriptionEndDate = company.SubscriptionStartDate.AddMonths(1);
+        company.IsActive = true;
 
         await _context.SaveChangesAsync();
 
         return MapToDto(company);
+    }
+
+    public async Task<PaymentDto?> RecordPaymentAsync(int id, RecordPaymentRequest request)
+    {
+        var company = await _context.Companies.FindAsync(id);
+        if (company == null) return null;
+
+        var payment = new Payment
+        {
+            Amount = request.Amount,
+            TransactionId = request.TransactionId,
+            CompanyId = id
+        };
+
+        _context.Payments.Add(payment);
+
+        company.SubscriptionStartDate = payment.PaidAt;
+        company.SubscriptionEndDate = payment.PaidAt.AddMonths(1);
+        company.IsActive = true;
+
+        await _context.SaveChangesAsync();
+
+        return new PaymentDto
+        {
+            Id = payment.Id,
+            Amount = payment.Amount,
+            PaidAt = payment.PaidAt,
+            TransactionId = payment.TransactionId
+        };
     }
 }

@@ -32,7 +32,14 @@ public class OfferService : IOfferService
             return new OfferOperationResponse { Success = false, Message = "Company not found" };
         }
 
-        if (company.SubscriptionPlan == SubscriptionPlan.Free && company.OffersUsed >= 5)
+        if (company.SubscriptionEndDate.HasValue && company.SubscriptionEndDate.Value < DateTime.UtcNow)
+        {
+            company.IsActive = false;
+            await _context.SaveChangesAsync();
+            return new OfferOperationResponse { Success = false, Message = "Subscription expired. Please renew to continue." };
+        }
+
+        if (company.SubscriptionPlan == SubscriptionPlan.Free && company.OffersUsed >= 3)
         {
             return new OfferOperationResponse { Success = false, Message = "Free plan limit reached. Please upgrade your plan." };
         }

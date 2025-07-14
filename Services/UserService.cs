@@ -41,6 +41,22 @@ public class UserService : IUserService
         var existingUser = await _userManager.FindByEmailAsync(request.Email);
         if (existingUser != null) return null;
 
+        var company = await _context.Companies.FindAsync(companyId);
+        if (company == null) return null;
+
+        if (company.SubscriptionEndDate.HasValue && company.SubscriptionEndDate.Value < DateTime.UtcNow)
+        {
+            company.IsActive = false;
+            await _context.SaveChangesAsync();
+            return null;
+        }
+
+        var userCount = await _context.Users.CountAsync(u => u.CompanyId == companyId);
+        if (company.SubscriptionPlan == SubscriptionPlan.Free && userCount >= 2)
+        {
+            return null;
+        }
+
         var user = new ApplicationUser
         {
             UserName = request.Email,

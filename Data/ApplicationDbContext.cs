@@ -15,6 +15,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<OfferItem> OfferItems { get; set; }
     public DbSet<Product> Products { get; set; }
     public DbSet<Customer> Customers { get; set; }
+    public DbSet<Payment> Payments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -108,6 +109,18 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             entity.HasOne(cu => cu.Company)
                   .WithMany(c => c.Customers)
                   .HasForeignKey(cu => cu.CompanyId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Payment configuration
+        builder.Entity<Payment>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Amount).HasColumnType("decimal(18,2)");
+
+            entity.HasOne(p => p.Company)
+                  .WithMany(c => c.Payments)
+                  .HasForeignKey(p => p.CompanyId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
     }

@@ -93,4 +93,22 @@ public class CompanyController : ControllerBase
 
         return Ok(company);
     }
+
+    [HttpPost("payment")]
+    public async Task<IActionResult> RecordPayment([FromBody] RecordPaymentRequest request)
+    {
+        var companyIdClaim = User.FindFirst("CompanyId")?.Value;
+        if (companyIdClaim == null || !int.TryParse(companyIdClaim, out var companyId))
+        {
+            return BadRequest("Invalid company");
+        }
+
+        var payment = await _companyService.RecordPaymentAsync(companyId, request);
+        if (payment == null)
+        {
+            return NotFound("Company not found");
+        }
+
+        return Ok(payment);
+    }
 }

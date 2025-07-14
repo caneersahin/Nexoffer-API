@@ -7,7 +7,7 @@ namespace OfferManagement.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "SuperAdmin")]
+//[Authorize(Roles = "SuperAdmin")]
 public class AdminController : ControllerBase
 {
     private readonly IAdminService _adminService;

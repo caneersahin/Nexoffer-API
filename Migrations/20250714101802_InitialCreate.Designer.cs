@@ -12,8 +12,8 @@ using OfferManagement.API.Data;
 namespace OfferManagement.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250712105803_CustomerandProducts")]
-    partial class CustomerandProducts
+    [Migration("20250714101802_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -279,6 +279,9 @@ namespace OfferManagement.API.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<int>("OffersUsed")
+                        .HasColumnType("int");
+
                     b.Property<string>("Phone")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -444,6 +447,33 @@ namespace OfferManagement.API.Migrations
                     b.ToTable("OfferItems");
                 });
 
+            modelBuilder.Entity("OfferManagement.API.Models.Payment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("PaidAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("TransactionId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
+
+                    b.ToTable("Payments");
+                });
+
             modelBuilder.Entity("OfferManagement.API.Models.Product", b =>
                 {
                     b.Property<int>("Id")
@@ -580,6 +610,17 @@ namespace OfferManagement.API.Migrations
                     b.Navigation("Offer");
                 });
 
+            modelBuilder.Entity("OfferManagement.API.Models.Payment", b =>
+                {
+                    b.HasOne("OfferManagement.API.Models.Company", "Company")
+                        .WithMany("Payments")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+                });
+
             modelBuilder.Entity("OfferManagement.API.Models.Product", b =>
                 {
                     b.HasOne("OfferManagement.API.Models.Company", "Company")
@@ -601,6 +642,8 @@ namespace OfferManagement.API.Migrations
                     b.Navigation("Customers");
 
                     b.Navigation("Offers");
+
+                    b.Navigation("Payments");
 
                     b.Navigation("Products");
 

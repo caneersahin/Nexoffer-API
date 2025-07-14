@@ -31,8 +31,19 @@ public class ProductService : IProductService
         return product == null ? null : MapToDto(product);
     }
 
-    public async Task<ProductDto> CreateProductAsync(CreateProductRequest request, int companyId)
+    public async Task<ProductDto?> CreateProductAsync(CreateProductRequest request, int companyId)
     {
+        // İsim kontrolü (null, boşluk vs)
+        if (string.IsNullOrWhiteSpace(request.Name))
+            return null;
+
+        // Aynı isimde ürün var mı kontrolü (aynı şirket içinde)
+        var existingProduct = await _context.Products
+            .FirstOrDefaultAsync(p => p.Name == request.Name && p.CompanyId == companyId);
+
+        if (existingProduct != null)
+            return null;
+
         var product = new Product
         {
             Name = request.Name,
@@ -48,12 +59,25 @@ public class ProductService : IProductService
         return MapToDto(product);
     }
 
+
     public async Task<ProductDto?> UpdateProductAsync(int id, UpdateProductRequest request, int companyId)
     {
+        // İsim kontrolü
+        if (string.IsNullOrWhiteSpace(request.Name))
+            return null;
+
         var product = await _context.Products
             .FirstOrDefaultAsync(p => p.Id == id && p.CompanyId == companyId);
 
-        if (product == null) return null;
+        if (product == null)
+            return null;
+
+        // Aynı isimde başka bir ürün var mı kontrolü (aynı ID'de olmayan)
+        var duplicate = await _context.Products
+            .AnyAsync(p => p.Id != id && p.CompanyId == companyId && p.Name == request.Name);
+
+        if (duplicate)
+            return null;
 
         product.Name = request.Name;
         product.Description = request.Description;
@@ -64,6 +88,7 @@ public class ProductService : IProductService
 
         return MapToDto(product);
     }
+
 
     public async Task<bool> DeleteProductAsync(int id, int companyId)
     {

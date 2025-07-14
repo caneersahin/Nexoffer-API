@@ -58,8 +58,15 @@ public class ProductsController : ControllerBase
         }
 
         var product = await _productService.CreateProductAsync(request, companyId);
+
+        if (product == null)
+        {
+            return BadRequest("Ürün adı boş olamaz veya aynı isimde ürün zaten mevcut.");
+        }
+
         return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product);
     }
+
 
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateProduct(int id, [FromBody] UpdateProductRequest request)
@@ -73,11 +80,13 @@ public class ProductsController : ControllerBase
         var product = await _productService.UpdateProductAsync(id, request, companyId);
         if (product == null)
         {
-            return NotFound("Product not found");
+            // Belki loglamak için servisten bool + hata mesajı da döndürülebilir
+            return BadRequest("Ürün bulunamadı veya geçersiz veri gönderildi.");
         }
 
         return Ok(product);
     }
+
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteProduct(int id)
